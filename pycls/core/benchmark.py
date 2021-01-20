@@ -7,7 +7,7 @@
 
 """Benchmarking functions."""
 
-import pycls.core.logging as logging
+import pycls.core.logging2 as logging
 import pycls.core.net as net
 import pycls.datasets.loader as loader
 import torch

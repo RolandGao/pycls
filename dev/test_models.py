@@ -17,7 +17,7 @@ import unittest
 import pycls.core.builders as builders
 import pycls.core.distributed as dist
 import pycls.core.env as env
-import pycls.core.logging as logging
+import pycls.core.logging2 as logging
 import pycls.core.net as net
 import pycls.core.trainer as trainer
 import pycls.models.model_zoo as model_zoo

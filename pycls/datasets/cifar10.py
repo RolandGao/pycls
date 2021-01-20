@@ -11,7 +11,7 @@ import os
 import pickle
 
 import numpy as np
-import pycls.core.logging as logging
+import pycls.core.logging2 as logging
 import torch.utils.data
 from iopath.common.file_io import g_pathmgr
 from pycls.core.config import cfg

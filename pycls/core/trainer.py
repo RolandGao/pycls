@@ -12,7 +12,7 @@ import pycls.core.builders as builders
 import pycls.core.checkpoint as cp
 import pycls.core.distributed as dist
 import pycls.core.env as env
-import pycls.core.logging as logging
+import pycls.core.logging2 as logging
 import pycls.core.meters as meters
 import pycls.core.net as net
 import pycls.core.optimizer as optim
@@ -203,3 +203,16 @@ def time_model_and_loader():
     test_loader = data_loader.construct_test_loader()
     # Compute model and loader timings
     benchmark.compute_time_full(model, loss_fun, train_loader, test_loader)
+
+def yoho1(file):
+    env.setup_env()
+    cfg.merge_from_file(file)
+    model = builders.build_model()
+    print("Model:\n{}".format(model)) if cfg.VERBOSE else ()
+    # Log model complexity
+    print(logging.dump_log_data(net.complexity(model), "complexity"))
+    loss_fun = builders.build_loss_fun()
+    benchmark.compute_time_model(model, loss_fun)
+
+if __name__=="__main__":
+    yoho1("../../configs/dds_baselines/resnet/R-50-1x64d_dds_8gpu.yaml")
