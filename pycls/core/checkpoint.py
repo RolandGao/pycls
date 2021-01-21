@@ -18,7 +18,7 @@ from pycls.core.net import unwrap_model
 
 
 # Common prefix for checkpoint file names
-_NAME_PREFIX = "model_epoch_"
+#_NAME_PREFIX = "model_epoch_"
 
 # Checkpoints directory name
 _DIR_NAME = "checkpoints"
@@ -29,23 +29,18 @@ def get_checkpoint_dir():
     return os.path.join(cfg.OUT_DIR, _DIR_NAME)
 
 
-def get_checkpoint(epoch):
+# def get_checkpoint(epoch):
+#     """Retrieves the path to a checkpoint file."""
+#     name = "{}{:04d}.pyth".format(_NAME_PREFIX, epoch)
+#     return os.path.join(get_checkpoint_dir(), name)
+def get_last_checkpoint():
     """Retrieves the path to a checkpoint file."""
-    name = "{}{:04d}.pyth".format(_NAME_PREFIX, epoch)
+    name = "last_model.pyth"
     return os.path.join(get_checkpoint_dir(), name)
 
-
-def get_checkpoint_best():
+def get_best_checkpoint():
     """Retrieves the path to the best checkpoint file."""
-    return os.path.join(cfg.OUT_DIR, "model.pyth")
-
-
-def get_last_checkpoint():
-    """Retrieves the most recent checkpoint (highest epoch number)."""
-    checkpoint_dir = get_checkpoint_dir()
-    checkpoints = [f for f in g_pathmgr.ls(checkpoint_dir) if _NAME_PREFIX in f]
-    last_checkpoint_name = sorted(checkpoints)[-1]
-    return os.path.join(checkpoint_dir, last_checkpoint_name)
+    return os.path.join(get_checkpoint_dir(), "best_model.pyth")
 
 
 def has_checkpoint():
@@ -53,7 +48,7 @@ def has_checkpoint():
     checkpoint_dir = get_checkpoint_dir()
     if not g_pathmgr.exists(checkpoint_dir):
         return False
-    return any(_NAME_PREFIX in f for f in g_pathmgr.ls(checkpoint_dir))
+    return any("latest_model.pyth" in f for f in g_pathmgr.ls(checkpoint_dir))
 
 
 def save_checkpoint(model, optimizer, epoch, best):
@@ -71,13 +66,13 @@ def save_checkpoint(model, optimizer, epoch, best):
         "cfg": cfg.dump(),
     }
     # Write the checkpoint
-    checkpoint_file = get_checkpoint(epoch + 1)
+    checkpoint_file = get_last_checkpoint()
     with g_pathmgr.open(checkpoint_file, "wb") as f:
         torch.save(checkpoint, f)
     # If best copy checkpoint to the best checkpoint
     if best:
         with g_pathmgr.open(checkpoint_file, "rb") as src:
-            with g_pathmgr.open(get_checkpoint_best(), "wb") as dst:
+            with g_pathmgr.open(get_best_checkpoint(), "wb") as dst:
                 copyfileobj(src, dst)
     return checkpoint_file
 
@@ -91,18 +86,3 @@ def load_checkpoint(checkpoint_file, model, optimizer=None):
     unwrap_model(model).load_state_dict(checkpoint["model_state"])
     optimizer.load_state_dict(checkpoint["optimizer_state"]) if optimizer else ()
     return checkpoint["epoch"]
-
-
-def delete_checkpoints(checkpoint_dir=None, keep="all"):
-    """Deletes unneeded checkpoints, keep can be "all", "last", or "none"."""
-    assert keep in ["all", "last", "none"], "Invalid keep setting: {}".format(keep)
-    checkpoint_dir = checkpoint_dir if checkpoint_dir else get_checkpoint_dir()
-    if keep == "all" or not g_pathmgr.exists(checkpoint_dir):
-        return 0
-    checkpoints = [f for f in g_pathmgr.ls(checkpoint_dir) if _NAME_PREFIX in f]
-    checkpoints = sorted(checkpoints)[:-1] if keep == "last" else checkpoints
-    [
-        g_pathmgr.rm(os.path.join(checkpoint_dir, checkpoint))
-        for checkpoint in checkpoints
-    ]
-    return len(checkpoints)

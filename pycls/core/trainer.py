@@ -154,11 +154,13 @@ def train_model():
         if cfg.BN.USE_PRECISE_STATS:
             net.compute_precise_bn_stats(model, train_loader)
         # Evaluate the model
-        test_epoch(test_loader, model, test_meter, cur_epoch)
+        best=False
+        if cur_epoch>=cfg.CP_LAST_EPOCHS:
+            test_epoch(test_loader, model, test_meter, cur_epoch)
         # Check if checkpoint is best so far (note: should checkpoint meters as well)
-        stats = test_meter.get_epoch_stats(cur_epoch)
-        best = stats["top1_err"] <= best_err
-        best_err = min(stats["top1_err"], best_err)
+            stats = test_meter.get_epoch_stats(cur_epoch)
+            best = stats["top1_err"] <= best_err
+            best_err = min(stats["top1_err"], best_err)
         # Save a checkpoint
         file = cp.save_checkpoint(model, optimizer, cur_epoch, best)
         logger.info("Wrote checkpoint to: {}".format(file))

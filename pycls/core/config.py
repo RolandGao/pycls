@@ -203,7 +203,9 @@ _C.OPTIM.STEPS = []
 _C.OPTIM.LR_MULT = 0.1
 
 # Maximal number of epochs
-_C.OPTIM.MAX_EPOCH = 200
+_C.OPTIM.MAX_EPOCH = 100
+
+_C.CP_LAST_EPOCHS=20
 
 # Momentum
 _C.OPTIM.MOMENTUM = 0.9
@@ -280,7 +282,7 @@ _C.TEST.WEIGHTS = ""
 _C.DATA_LOADER = CfgNode()
 
 # Number of data loader workers per process
-_C.DATA_LOADER.NUM_WORKERS = 8
+_C.DATA_LOADER.NUM_WORKERS = 4
 
 # Load data to pinned host memory
 _C.DATA_LOADER.PIN_MEMORY = True
