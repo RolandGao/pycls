@@ -205,7 +205,7 @@ _C.OPTIM.LR_MULT = 0.1
 # Maximal number of epochs
 _C.OPTIM.MAX_EPOCH = 100
 
-_C.CP_LAST_EPOCHS=20
+_C.CP_LAST_EPOCHS=80
 
 # Momentum
 _C.OPTIM.MOMENTUM = 0.9

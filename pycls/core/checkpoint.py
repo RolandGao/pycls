@@ -48,7 +48,7 @@ def has_checkpoint():
     checkpoint_dir = get_checkpoint_dir()
     if not g_pathmgr.exists(checkpoint_dir):
         return False
-    return any("latest_model.pyth" in f for f in g_pathmgr.ls(checkpoint_dir))
+    return any("last_model.pyth" in f for f in g_pathmgr.ls(checkpoint_dir))
 
 
 def save_checkpoint(model, optimizer, epoch, best):

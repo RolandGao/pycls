@@ -185,3 +185,8 @@ def drop_connect(x, drop_ratio):
     x.div_(keep_ratio)
     x.mul_(mask)
     return x
+
+if __name__=="__main__":
+    cx={"h":112,"w":112,"flops":0,"params":0,"acts":0}
+    cx=conv2d_cx(cx, 3, 32, 3, stride=2, groups=1, bias=False)
+    print(cx["flops"]/1024**2)

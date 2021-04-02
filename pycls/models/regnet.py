@@ -9,7 +9,7 @@
 
 import numpy as np
 import pycls.models.blocks as bk
-from pycls.core.config import cfg
+from pycls.core.config import cfg, reset_cfg,merge_from_file
 from pycls.models.anynet import AnyNet
 
 
@@ -67,3 +67,26 @@ class RegNet(AnyNet):
         """Computes model complexity (if you alter the model, make sure to update)."""
         params = RegNet.get_params() if not params else params
         return AnyNet.complexity(cx, params)
+
+if __name__=="__main__":
+    import os
+    #print(list(os.listdir("../../configs/dds_baselines/regnetx/")))
+    directory="../../configs/dds_baselines/regnety/"
+    files=list(os.listdir(directory))
+    gs=[]
+    mss=[]
+    for file in files:
+        cfg.merge_from_file(os.path.join(directory,file))
+        params=RegNet.get_params()
+        g=params['group_ws'][0]
+        ws=params['widths']
+        ms=[w//g for w in ws]
+        gs.append(g)
+        mss.append(ms)
+        #print(g,ms)
+    gs=np.array(gs)
+    mss=np.array(mss)
+    inds=np.argsort(gs)
+    for g,ms in zip(gs[inds],mss[inds]):
+        print(g,ms)
+#[128, 192, 512, 1088] g=64, b=1, e=20.5% wa =31, w0 =96, wm =2.2

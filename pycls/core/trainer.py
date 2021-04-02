@@ -114,6 +114,38 @@ def test_epoch(loader, model, meter, cur_epoch):
     # Log epoch stats
     meter.log_epoch_stats(cur_epoch)
 
+@torch.no_grad()
+def test_epoch2(loader, model, meter, cur_epoch):
+    """Evaluates the model on the test set."""
+    # Enable eval mode
+    model.eval()
+    meter.reset()
+    meter.iter_tic()
+    confidence_of_labels=[]
+    transform=torch.nn.Softmax(dim=1).cuda()
+    for cur_iter, (inputs, labels) in enumerate(loader):
+        # Transfer the data to the current GPU device
+        inputs, labels = inputs.cuda(), labels.cuda(non_blocking=True)
+        # Compute the predictions
+        preds = model(inputs)
+        preds=transform(preds)
+        temp_list=list(preds[torch.arange(labels.size()[0]).cuda(),labels])
+        confidence_of_labels.extend(temp_list)
+        # Compute the errors
+        # top1_err, top5_err = meters.topk_errors(preds, labels, [1, 5])
+        # # Combine the errors across the GPUs  (no reduction if 1 GPU used)
+        # top1_err, top5_err = dist.scaled_all_reduce([top1_err, top5_err])
+        # # Copy the errors from GPU to CPU (sync point)
+        # top1_err, top5_err = top1_err.item(), top5_err.item()
+        meter.iter_toc()
+        # Update and log stats
+        #meter.update_stats(top1_err, top5_err, inputs.size(0) * cfg.NUM_GPUS)
+        meter.log_iter_stats(cur_epoch, cur_iter)
+        meter.iter_tic()
+    # Log epoch stats
+    print(len(confidence_of_labels))
+    hist=torch.histc(torch.tensor([confidence_of_labels]))
+    print(hist)
 
 def train_model():
     """Trains the model."""
@@ -212,9 +244,10 @@ def yoho1(file):
     model = builders.build_model()
     print("Model:\n{}".format(model)) if cfg.VERBOSE else ()
     # Log model complexity
-    print(logging.dump_log_data(net.complexity(model), "complexity"))
-    loss_fun = builders.build_loss_fun()
-    benchmark.compute_time_model(model, loss_fun)
+    # print(logging.dump_log_data(net.complexity(model), "complexity"))
+    # loss_fun = builders.build_loss_fun()
+    # benchmark.compute_time_model(model, loss_fun)
 
 if __name__=="__main__":
-    yoho1("../../configs/dds_baselines/resnet/R-50-1x64d_dds_8gpu.yaml")
+    yoho1("../../configs/dds_baselines/regnetx/RegNetX-8.0GF_dds_8gpu.yaml")
+    #yoho1("../../configs/dds_baselines/resnet/R-50-1x64d_dds_8gpu.yaml")
